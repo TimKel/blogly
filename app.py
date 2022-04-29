@@ -1,7 +1,7 @@
 """Blogly application."""
 
 from flask import Flask, redirect, request, render_template, session, flash
-from models import db, connect_db, User
+from models import db, connect_db, User, Post
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///blogly'
@@ -43,7 +43,7 @@ def add_user():
     new_user = User(first_name=first_name, last_name=last_name, image_url=image_url)
     db.session.add(new_user)
     db.session.commit()
-    flash('New User Created')
+    flash(f'New User Created')
     return redirect('/users')
     # CHANGE REDIRECT TO SEND TO CREATED PROFILE
 
@@ -69,7 +69,7 @@ def post_edit(user_id):
 
     db.session.add(user)
     db.session.commit()
-    flash("Changes Saved")
+    flash(f"Changes Saved")
     return redirect('/users')
 
 @app.route('/users/<int:user_id>/delete', methods=["POST"])
@@ -78,6 +78,29 @@ def delete_user(user_id):
     user = User.query.get_or_404(user_id)
     db.session.delete(user)
     db.session.commit()
+    flash(f"User Deleted")
 
     return redirect('/users')
+
+"""New Routes"""
+
+@app.route('/users/<int:user_id>/posts/new', methods=['GET'])
+def add_post_form(user_id):
+    """Show form to add a post for that user"""
+    user = User.query.get_or_404(user_id)
+
+    return render_template('newpost.html', user=user)
+
+@app.route('/users/<int:user_id>/posts/new', methods=["POST"])
+def add_post(user_id):
+    """Handle submission for creating a new post"""
+    user = User.query.get_or_404(user_id)
+    new_post = Post(title=request.form['title'],
+                    content=request.form['content'],
+                    user=user)
+    db.session.add(new_post)
+    db.session.commit()
+    flash(f"Post '{new_post.title}' added.")
+
+    return redirect(f"/users/{user_id}")
 
