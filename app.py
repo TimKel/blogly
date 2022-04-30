@@ -6,6 +6,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///blogly"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'ihaveasecret'
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 # Having the Debug Toolbar show redirects explicitly is often useful;
 # however, if you want to turn it off, you can uncomment this line:
@@ -23,14 +24,7 @@ def root():
     """Show recent list of posts, most-recent first."""
 
     posts = Post.query.order_by(Post.created_at.desc()).limit(5).all()
-    return render_template("posts/homepage.html", posts=posts)
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    """Show 404 NOT FOUND page."""
-
-    return render_template('404.html'), 404
+    return render_template("posthome.html", posts=posts)
 
 
 ##############################################################################
@@ -41,14 +35,14 @@ def users_index():
     """Show a page with info on all users"""
 
     users = User.query.order_by(User.last_name, User.first_name).all()
-    return render_template('users/index.html', users=users)
+    return render_template('userindex.html', users=users)
 
 
 @app.route('/users/new', methods=["GET"])
 def users_new_form():
     """Show a form to create a new user"""
 
-    return render_template('users/new.html')
+    return render_template('newuser.html')
 
 
 @app.route("/users/new", methods=["POST"])
@@ -72,7 +66,7 @@ def users_show(user_id):
     """Show a page with info on a specific user"""
 
     user = User.query.get_or_404(user_id)
-    return render_template('users/show.html', user=user)
+    return render_template('showuser.html', user=user)
 
 
 @app.route('/users/<int:user_id>/edit')
@@ -80,7 +74,7 @@ def users_edit(user_id):
     """Show a form to edit an existing user"""
 
     user = User.query.get_or_404(user_id)
-    return render_template('users/edit.html', user=user)
+    return render_template('edituser.html', user=user)
 
 
 @app.route('/users/<int:user_id>/edit', methods=["POST"])
@@ -120,7 +114,7 @@ def posts_new_form(user_id):
     """Show a form to create a new post for a specific user"""
 
     user = User.query.get_or_404(user_id)
-    return render_template('posts/new.html', user=user)
+    return render_template('newpost.html', user=user)
 
 
 @app.route('/users/<int:user_id>/posts/new', methods=["POST"])
@@ -144,7 +138,7 @@ def posts_show(post_id):
     """Show a page with info on a specific post"""
 
     post = Post.query.get_or_404(post_id)
-    return render_template('posts/show.html', post=post)
+    return render_template('showpost.html', post=post)
 
 
 @app.route('/posts/<int:post_id>/edit')
@@ -152,7 +146,7 @@ def posts_edit(post_id):
     """Show a form to edit an existing post"""
 
     post = Post.query.get_or_404(post_id)
-    return render_template('posts/edit.html', post=post)
+    return render_template('editpost.html', post=post)
 
 
 @app.route('/posts/<int:post_id>/edit', methods=["POST"])
