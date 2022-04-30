@@ -48,6 +48,24 @@ class Post(db.Model):
 
         return self.created_at.strftime("%a %b %-d  %Y, %-I:%M %p")
 
+class Tag(db.Model):
+    """Tagging Feature"""
+
+    __tablename__ = "tags"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False, unique=True)
+
+    posts = db.relationship('Post', secondary='posts_tags', cascade="all, delete", backref='tags')
+
+
+class Post_Tag(db.Model):
+    """Joins together Post and Tag Models"""
+
+    __tablename__ = "posts_tags"
+
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), primary_key=True, nullable=False)
+    tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'), primary_key=True, nullable=False)
 
 def connect_db(app):
     """Connect this database to provided Flask app.
